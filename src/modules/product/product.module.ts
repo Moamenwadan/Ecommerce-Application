@@ -9,16 +9,30 @@ import { ProductRepository } from 'src/DB/repositers/product.repository';
 import { CategoryModel } from 'src/DB/models/category.model';
 import { FileUploadService } from 'src/common/FileUpload/cloudinary.service';
 import { FileUploadModule } from 'src/common/FileUpload/cloudinary.module';
+import { SocketGateway } from '../socket/socket.getway';
+import { SocketModule } from '../socket/socket.module';
+import { JwtModule, JwtService } from '@nestjs/jwt';
+import { UserRepository } from 'src/DB/repositers/user.repository';
+import { TokenRepository } from 'src/DB/repositers/token.repository';
 
+// imports: [ProductModel, CategoryModule, FileUploadModule],
 @Module({
-  imports: [ProductModel, CategoryModule, FileUploadModule],
-  controllers: [ProductController],
+  imports: [
+    ProductModel,
+    CategoryModule,
+    FileUploadModule,
+    SocketModule,
+    JwtModule,
+  ],
   providers: [
     ProductService,
     ProductRepository,
     CategoryRepository,
     FileUploadService,
+    SocketGateway,
+    JwtService,
   ],
-  exports: [ProductRepository, ProductService],
+  controllers: [ProductController],
+  exports: [ProductRepository, ProductService, SocketGateway],
 })
 export class ProductModule {}

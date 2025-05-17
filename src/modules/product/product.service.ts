@@ -13,6 +13,7 @@ import { v4 as uuid } from 'uuid';
 import { Image } from 'src/common/types/image.type';
 import { FindProductsDto } from './dto/find-product.dto';
 import { ProductDocument } from 'src/DB/models/product.model';
+import { SocketGateway } from '../socket/socket.getway';
 
 @Injectable()
 export class ProductService {
@@ -20,6 +21,7 @@ export class ProductService {
     private readonly _CategoryRepository: CategoryRepository,
     private readonly _ProductRepository: ProductRepository,
     private readonly _FileUploadService: FileUploadService,
+    private readonly _SocketGateway: SocketGateway,
   ) {}
   async create(
     data: CreateProductDto,
@@ -201,6 +203,22 @@ export class ProductService {
       filter: { _id: productId },
     });
     if (!product) throw new BadRequestException("the product doesn't exist");
+    return product;
+  }
+
+  async updateStock(productId: Types.ObjectId, quantity: number, inc: boolean) {
+    const product = await this._ProductRepository.update({
+      filter: { _id: productId },
+      update: { $inc: { stock: inc ? quantity : -quantity } },
+    });
+    if (!product) throw new BadRequestException('kjlk');
+
+    // socket
+    this._SocketGateway.broadCatStockUpdate(
+      product!._id as Types.ObjectId,
+      product?.stock,
+    );
+
     return product;
   }
 

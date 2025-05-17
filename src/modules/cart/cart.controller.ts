@@ -28,24 +28,18 @@ export class CartController {
   ) {
     return this.cartService.addToCart(data, userId);
   }
-
-  @Get()
-  findAll() {
-    return this.cartService.findAll();
+  @Patch('/updateCart')
+  @Roles(Role.user)
+  updateCart(
+    @Body() data: CreateCartDto,
+    @User('_id', ParseObjectIdPipe) userId: Types.ObjectId,
+  ) {
+    return this.cartService.updateCart(data, userId);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.cartService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCartDto: UpdateCartDto) {
-    return this.cartService.update(+id, updateCartDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.cartService.remove(+id);
+  @Patch('/clearCart')
+  @Roles(Role.user)
+  clearCart(@User('_id', ParseObjectIdPipe) userId: Types.ObjectId) {
+    return this.cartService.clearCart(userId);
   }
 }

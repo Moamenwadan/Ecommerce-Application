@@ -6,10 +6,12 @@ import { CartService } from '../cart/cart.service';
 import { ProductModule } from '../product/product.module';
 import { OrderModel } from 'src/DB/models/order.model';
 import { OrderRepository } from 'src/DB/repositers/order.repository';
+import { PaymentService } from 'src/common/services/payment/payment.service';
+import { PaymentModule } from 'src/common/services/payment/payment.module';
 
 @Module({
-  imports: [OrderModel, CartModule, ProductModule],
+  imports: [OrderModel, CartModule, ProductModule, PaymentModule],
   controllers: [OrderController],
-  providers: [OrderService, CartService, OrderRepository],
+  providers: [OrderService, CartService, OrderRepository, PaymentService],
 })
 export class OrderModule {}

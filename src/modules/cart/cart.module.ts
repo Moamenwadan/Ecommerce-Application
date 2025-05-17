@@ -7,7 +7,6 @@ import { CartRepository } from 'src/DB/repositers/cart.repository';
 import { ProductRepository } from 'src/DB/repositers/product.repository';
 import { ProductModel } from 'src/DB/models/product.model';
 import { ProductService } from '../product/product.service';
-import { CategoryRepository } from 'src/DB/repositers/category.repository';
 import { CategoryModule } from '../category/category.module';
 import { FileUploadModule } from 'src/common/FileUpload/cloudinary.module';
 

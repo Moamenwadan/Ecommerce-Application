@@ -71,19 +71,37 @@ export class CartService {
     });
   }
 
-  findAll() {
-    return `This action returns all cart`;
+  async updateCart(data: CreateCartDto, userId: Types.ObjectId) {
+    const { productId, quantity } = data;
+    console.log(data);
+    const product = await this._ProductRepository.findOne({
+      filter: { _id: productId },
+    });
+    if (!product) throw new BadRequestException("the product doesn't exist");
+    if (!this._ProductService.inStock(product, quantity))
+      throw new BadRequestException(
+        "the quantity that you want doesn't exist in stock",
+      );
+
+    const updateCart = await this._CartRepository.update({
+      filter: {
+        user: userId,
+        'products.productId': productId,
+      },
+      update: {
+        'products.$.quantity': quantity,
+        'products.$.price': product.finalPrice,
+      },
+    });
+
+    return { success: true, data: updateCart };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} cart`;
-  }
-
-  update(id: number, updateCartDto: UpdateCartDto) {
-    return `This action updates a #${id} cart`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} cart`;
+  async clearCart(userId: Types.ObjectId) {
+    const clearCart = await this._CartRepository.update({
+      filter: { user: userId },
+      update: { products: [] },
+    });
+    return { success: true, data: clearCart };
   }
 }
