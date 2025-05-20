@@ -47,8 +47,12 @@ type Test {
 }
 
 type Query {
-  allOrders: AllOrdersResponse!
+  allOrders(paginate: paginateInput): AllOrdersResponse!
   test(id: Int!): Test!
+}
+
+input paginateInput {
+  page: Int!
 }
 
 type Mutation {

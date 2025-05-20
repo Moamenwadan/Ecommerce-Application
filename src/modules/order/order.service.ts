@@ -12,6 +12,7 @@ import { Orderstatus, PaymentMethod } from 'src/DB/models/order.model';
 import { Query } from '@nestjs/graphql';
 import { AllOrdersResponse } from './entities/order.entity';
 import { Graphql } from 'src/common/public/graphql.decorator';
+import { paginateInput } from 'src/common/graphql/inputs/paginate.input';
 
 @Injectable()
 export class OrderService {
@@ -133,9 +134,12 @@ export class OrderService {
     return { message: 'done' };
   }
 
-  allOrders() {
-    return this._OrderRepository.findAll({
+  async allOrders(userId: Types.ObjectId, page?: paginateInput) {
+    // console.log(userId);
+    return await this._OrderRepository.findAll({
+      filter: { user: userId },
       populate: 'user',
+      paginate: page,
     });
   }
 
