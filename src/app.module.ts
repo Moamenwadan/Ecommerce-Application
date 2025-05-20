@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { Inject, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
@@ -11,6 +11,14 @@ import { loggerMiddleware } from './common/middleware/logger.middleware';
 import { ProductModule } from './modules/product/product.module';
 import { CartModule } from './modules/cart/cart.module';
 import { OrderModule } from './modules/order/order.module';
+import { createKeyv, Keyv } from '@keyv/redis';
+import { CacheModule } from '@nestjs/cache-manager';
+import { CacheableMemory } from 'cacheable';
+import { TestModule } from './modules/test/test.module';
+import { GraphQLModule } from '@nestjs/graphql';
+import { join } from 'path';
+import { ApolloDriver } from '@nestjs/apollo';
+// import { OrderResolver } from './module/order/order.resolver';
 
 @Module({
   imports: [
@@ -40,17 +48,46 @@ import { OrderModule } from './modules/order/order.module';
         };
       },
     }),
+    GraphQLModule.forRoot({
+      driver: ApolloDriver,
+      autoSchemaFile: join(process.cwd(), 'src/modules/schema.gql'),
+      context: ({ req, res }) => ({ req, res }),
+    }),
+    CacheModule.registerAsync({
+      useFactory: (configService: ConfigService) => {
+        return {
+          stores: [
+            new Keyv({
+              store: new CacheableMemory(),
+              ttl: 15000,
+            }),
+            createKeyv(configService.get('REDIS_LOCAL')),
+          ],
+        };
+      },
+      inject: [ConfigService],
+      isGlobal: true,
+    }),
+
     UserModule,
     CategoryModule,
     ProductModule,
     CartModule,
     OrderModule,
+    TestModule,
   ],
   controllers: [AppController],
   providers: [AppService],
+  // providers: [AppService, OrderResolver],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(loggerMiddleware).forRoutes('*');
   }
 }
+// stores:[
+//   new Keyv({
+//     store:new CacheableMemory()
+//   })
+//   createKeyv(configService.get("REDIS_LOCAL"))
+// ]

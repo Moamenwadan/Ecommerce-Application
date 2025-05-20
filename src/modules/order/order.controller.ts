@@ -15,6 +15,8 @@ import { User } from 'src/common/public/param.decorator';
 import { Roles } from 'src/common/public/roles.decorator';
 import { Role } from 'src/DB/models/enums/user.enum';
 import { Public } from 'src/common/public/public.decorator';
+import { ParseObjectIdPipe } from '@nestjs/mongoose';
+import { Types } from 'mongoose';
 
 @Controller('order')
 export class OrderController {
@@ -32,19 +34,23 @@ export class OrderController {
     console.log({ dataFromstripe: data });
     return this.orderService.stripeWebHook(data);
   }
-  @Get()
-  findAll() {
-    return this.orderService.findAll();
-  }
+  // @Get()
+  // findAll() {
+  //   return this.orderService.findAll();
+  // }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.orderService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    return this.orderService.update(+id, updateOrderDto);
+  @Roles(Role.user)
+  @Post('cancel/:id')
+  cancelOrder(
+    @Param('id', ParseObjectIdPipe) orderId: Types.ObjectId,
+    @User('_id') userId: Types.ObjectId,
+  ) {
+    return this.orderService.cancelOrder(orderId, userId);
   }
 
   @Delete(':id')

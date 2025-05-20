@@ -4,6 +4,7 @@ import { MongooseModule, Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
 import { userModelName } from './user.model';
 import { CartModelName } from './cart.model';
 import { Image } from 'src/common/types/image.type';
+import { registerEnumType } from '@nestjs/graphql';
 export enum Orderstatus {
   placed = 'placed',
   shipped = 'shipped',
@@ -12,10 +13,16 @@ export enum Orderstatus {
   canceled = 'canceled',
   refounded = 'refounded',
 }
+registerEnumType(Orderstatus, {
+  name: 'Orderstatus',
+});
 export enum PaymentMethod {
   card = 'card',
   cash = 'cash',
 }
+registerEnumType(PaymentMethod, {
+  name: 'PaymentMethod',
+});
 
 // class schema
 @Schema({ timestamps: true })

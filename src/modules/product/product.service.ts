@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -14,6 +15,8 @@ import { Image } from 'src/common/types/image.type';
 import { FindProductsDto } from './dto/find-product.dto';
 import { ProductDocument } from 'src/DB/models/product.model';
 import { SocketGateway } from '../socket/socket.getway';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class ProductService {
@@ -22,6 +25,7 @@ export class ProductService {
     private readonly _ProductRepository: ProductRepository,
     private readonly _FileUploadService: FileUploadService,
     private readonly _SocketGateway: SocketGateway,
+    @Inject(CACHE_MANAGER) private readonly cacheManger: Cache,
   ) {}
   async create(
     data: CreateProductDto,
@@ -168,9 +172,14 @@ export class ProductService {
     return { success: true, message: 'delete product is successfully occur' };
   }
   async findAll(query: FindProductsDto) {
+    const key = `products ${JSON.stringify(query)}`;
+    const cached = await this.cacheManger.get(key);
+    if (cached) return { data: cached };
     const products = await this._ProductRepository.findAll({
       filter: {
-        ...(query.category && { category: new Types.ObjectId(query.category) }),
+        ...(query.category && {
+          category: new Types.ObjectId(query.category),
+        }),
         ...(query.k && {
           $or: [
             { name: { $regex: query.k, $options: 'i' } },
@@ -193,6 +202,7 @@ export class ProductService {
       },
       paginate: { page: query.page },
     });
+    await this.cacheManger.set(key, products);
     return { success: true, data: products };
   }
   inStock(product: ProductDocument, requiredQuantity: number) {
@@ -220,6 +230,13 @@ export class ProductService {
     );
 
     return product;
+  }
+
+  async testRedis() {
+    await this.cacheManger.set('testnestjs', 'Hi from testredis');
+
+    const result = await this.cacheManger.get('testnestjs');
+    return { data: result };
   }
 
   findOne(id: number) {

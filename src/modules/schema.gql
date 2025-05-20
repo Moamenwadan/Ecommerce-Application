@@ -1,0 +1,69 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type OneUserResponse {
+  firstName: String
+  lastName: String
+  email: String
+}
+
+type OneOrderResponse {
+  _id: ID!
+  user: OneUserResponse!
+  phone: String!
+  address: String!
+  orderStatus: Orderstatus!
+  price: Float!
+  paymentMethod: PaymentMethod!
+  paid: Boolean!
+}
+
+enum Orderstatus {
+  placed
+  shipped
+  onWay
+  delivered
+  canceled
+  refounded
+}
+
+enum PaymentMethod {
+  card
+  cash
+}
+
+type AllOrdersResponse {
+  totalNumberOfCategory: Float!
+  totalPages: Float!
+  pageSize: Float!
+  pageNumber: Float!
+  data: [OneOrderResponse!]!
+}
+
+type Test {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+type Query {
+  allOrders: AllOrdersResponse!
+  test(id: Int!): Test!
+}
+
+type Mutation {
+  createTest(createTestInput: CreateTestInput!): Test!
+  updateTest(updateTestInput: UpdateTestInput!): Test!
+  removeTest(id: Int!): Test!
+}
+
+input CreateTestInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input UpdateTestInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}

@@ -33,7 +33,7 @@ export abstract class AbstractRepositry<TDocument> {
     if (sort) query = query.sort(sort);
     const page = paginate?.page ? paginate?.page : 1;
     console.log(page);
-    let limit = 1;
+    let limit = 4;
     let skip = (page! - 1) * limit;
     const totalNumberOfCategory = await query.model.countDocuments(
       query.getQuery(),

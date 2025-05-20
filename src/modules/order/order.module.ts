@@ -8,10 +8,18 @@ import { OrderModel } from 'src/DB/models/order.model';
 import { OrderRepository } from 'src/DB/repositers/order.repository';
 import { PaymentService } from 'src/common/services/payment/payment.service';
 import { PaymentModule } from 'src/common/services/payment/payment.module';
+// import { OrderResolver } from './order.resolver';
+import { OrderResolver } from './order.resolver';
 
 @Module({
   imports: [OrderModel, CartModule, ProductModule, PaymentModule],
   controllers: [OrderController],
-  providers: [OrderService, CartService, OrderRepository, PaymentService],
+  providers: [
+    OrderService,
+    CartService,
+    OrderRepository,
+    PaymentService,
+    OrderResolver,
+  ],
 })
 export class OrderModule {}

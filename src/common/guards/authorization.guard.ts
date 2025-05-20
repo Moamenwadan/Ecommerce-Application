@@ -9,6 +9,8 @@ import { Observable } from 'rxjs';
 import { Is_PUBLIC_KEY } from '../public/public.decorator';
 import { Request } from 'express';
 import { ROLES_KEY } from '../public/roles.decorator';
+import { Is_GRAPHQL } from '../public/graphql.decorator';
+import { GqlExecutionContext } from '@nestjs/graphql';
 @Injectable()
 export class AuthorizationGuard implements CanActivate {
   constructor(private _reflector: Reflector) {}
@@ -18,8 +20,20 @@ export class AuthorizationGuard implements CanActivate {
       context.getClass(),
     ]);
     if (isPublic) return true;
+
+    let request;
+    const isGraphql = this._reflector.getAllAndOverride(Is_GRAPHQL, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    if (isGraphql) {
+      const ctx = GqlExecutionContext.create(context).getContext();
+      request = ctx.req;
+    } else {
+      request = context.switchToHttp().getRequest();
+    }
     try {
-      const request = context.switchToHttp().getRequest();
       const { user } = request;
       const requiredRoles = this._reflector.getAllAndOverride(ROLES_KEY, [
         context.getHandler(),

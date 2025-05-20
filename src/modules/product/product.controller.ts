@@ -100,6 +100,11 @@ export class ProductController {
   findAll(@Query() query: FindProductsDto) {
     return this.productService.findAll(query);
   }
+  @Public()
+  @Get('/redis/cache')
+  async testRedis() {
+    return this.productService.testRedis();
+  }
 
   @Get(':id')
   findOne(@Param('id') id: string) {

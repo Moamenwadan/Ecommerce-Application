@@ -8,6 +8,10 @@ import { ProductRepository } from 'src/DB/repositers/product.repository';
 import { ProductService } from '../product/product.service';
 import { OrderRepository } from 'src/DB/repositers/order.repository';
 import { PaymentService } from 'src/common/services/payment/payment.service';
+import { Orderstatus, PaymentMethod } from 'src/DB/models/order.model';
+import { Query } from '@nestjs/graphql';
+import { AllOrdersResponse } from './entities/order.entity';
+import { Graphql } from 'src/common/public/graphql.decorator';
 
 @Injectable()
 export class OrderService {
@@ -110,18 +114,33 @@ export class OrderService {
         payment_intent: info.data.object.payment_intent,
       },
     });
-    // await this._CartService.clearCart(order!.user);
+    await this._CartService.clearCart(order!.user);
   }
-  findAll() {
-    return `This action returns all order`;
+
+  async cancelOrder(orderId: Types.ObjectId, userId: Types.ObjectId) {
+    const order = await this._OrderRepository.findOne({
+      filter: { _id: orderId, user: userId },
+    });
+    if (!order) throw new BadRequestException('Invalid order');
+
+    if (order.paymentMethod == PaymentMethod.card) {
+      await this._PaymentService.refund(order.payment_intent);
+      order.orderStatus = Orderstatus.refounded;
+    }
+    order.orderStatus = Orderstatus.canceled;
+    await order.save();
+
+    return { message: 'done' };
+  }
+
+  allOrders() {
+    return this._OrderRepository.findAll({
+      populate: 'user',
+    });
   }
 
   findOne(id: number) {
     return `This action returns a #${id} order`;
-  }
-
-  update(id: number, updateOrderDto: UpdateOrderDto) {
-    return `This action updates a #${id} order`;
   }
 
   remove(id: number) {
